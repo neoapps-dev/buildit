@@ -4,8 +4,8 @@ build:windows {
 @echo off
 echo [BuildIt Builder] You have reached this compiler!
 echo [BuildIt Builder] Building BuildIt...
-cargo build
-copy target\debug\buildit.exe buildit.exe
+cargo build --release
+copy target\release\buildit.exe buildit.exe
 echo [Buildit Builder] Done, try `.\buildit.exe`
 exit /b
 }
@@ -13,8 +13,8 @@ build:lignux {
 #!/bin/bash
 echo [BuildIt Builder] You have reached this compiler!
 echo [BuildIt Builder] Building BuildIt...
-cargo build
-cp target\debug\buildit buildit
+cargo build --release
+cp target\release\buildit buildit
 echo [Buildit Builder] Done, try `./buildit`
 exit
 }
@@ -22,8 +22,8 @@ build:darwin {
 #!/bin/zsh
 echo [BuildIt Builder] You have reached this compiler!
 echo [BuildIt Builder] Building BuildIt...
-cargo build
-cp target\debug\buildit buildit
+cargo build --release
+cp target\release\buildit buildit
 echo [Buildit Builder] Done, try `./buildit`
 exit
 }
