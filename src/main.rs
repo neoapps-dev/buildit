@@ -11,17 +11,22 @@ fn get_os_type() -> &'static str {
     }
     #[cfg(target_os = "linux")]
     {
-        "lignux"
+        "linux"
     }
     #[cfg(target_os = "macos")]
     {
         "macos"
     }
-    #[cfg(not(any(windows, target_os = "linux", target_os = "macos")))]
+    #[cfg(target_os = "unix")]
+    {
+        "unix"
+    }
+    #[cfg(not(any(windows, target_os = "linux", target_os = "macos", target_os = "unix")))]
     {
         "unknown"
     }
 }
+
 
 fn execute_command(command: &str, platform: &str) {
     let args: Vec<String> = env::args().collect();

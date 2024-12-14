@@ -27,3 +27,6 @@ cp target\release\buildit buildit
 echo [Buildit Builder] Done, try `./buildit`
 exit
 }
+build:unix {
+echo I didn't try Unix yet :)
+}
