@@ -18,7 +18,7 @@ cp target\release\buildit buildit
 echo [Buildit Builder] Done, try `./buildit`
 exit
 }
-build:darwin {
+build:macos {
 #!/bin/zsh
 echo [BuildIt Builder] You have reached this compiler!
 echo [BuildIt Builder] Building BuildIt...
