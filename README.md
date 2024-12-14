@@ -66,18 +66,26 @@ The `BuildFile` is where platform-specific functions are defined. It uses a simp
 
 ```BuildFile
 build:windows {
+    @echo off
     echo "Building project on Windows"
-    rust build --release
+    cargo build --release
 }
 
 build:lignux {
+    #!/bin/bash
     echo "Building project on GNU/Linux"
     cargo build --release
 }
 
 build:macos {
+    #!/bin/zsh
     echo "Building project on macOS"
     cargo build --release
+}
+
+build:unix {
+    #!/bin/sh
+    echo "Hello from Unix!"
 }
 ```
 
@@ -85,11 +93,11 @@ build:macos {
 
 - The first part (`build:windows {`) specifies the function name (`build`) and the platform (`windows`).
 - The commands inside the curly braces are the steps that will be executed on the specified platform.
-- Each platform-specific section can include its own commands, such as `cargo build`, `rust build`, or any other shell command.
+- Each platform-specific section can include its own commands, such as `cargo build`, `gcc`, or any other shell command.
 
 ## How It Works
 
-1. **Platform Detection**: BuildIt detects the current platform (Windows, GNU/Linux, or macOS).
+1. **Platform Detection**: BuildIt detects the current platform (Windows, GNU/Linux, Unix, or macOS).
 2. **Function Lookup**: It looks for a function in the `BuildFile` that matches the specified function name.
 3. **Command Execution**: The corresponding commands for the detected platform are extracted and executed in a temporary script (either `.bat` for Windows or `.sh` for Unix-like systems).
 4. **Error Handling**: If a function or platform-specific command is missing, BuildIt will output an error message and terminate the process.
