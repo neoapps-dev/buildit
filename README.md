@@ -40,9 +40,11 @@ Follow these steps to get BuildIt up and running on your system:
 
 4. **Locate the executable** in the `target/release` directory after the build is complete.
 
+5. **Add to PATH**: Add the `target/release/buildit` or `target\release\buildit.exe` if you're on Windows to your PATH.
+
 ## Usage
 
-Once built, you can use BuildIt to automate build tasks on different platforms by specifying a function name.
+Once built and added to PATH, you can use BuildIt to automate build tasks on different platforms by specifying a function name.
 
 ### Command Syntax
 
@@ -65,24 +67,37 @@ The `BuildFile` is where platform-specific functions are defined. It uses a simp
 ### Example `BuildFile`
 
 ```BuildFile
+
+# An Optional Config Function
+config:buildit {
+# Turns off using PowerShell on Windows. default: `false`
+usePowershellOnWindows: false
+# Turns off using PowerShell 7 instead of the default PowerShell 5 on Windows. default: `false`
+usePowershell7: false
+}
+
+# Windows Script with a Batch Script
 build:windows {
     @echo off
     echo "Building project on Windows"
     cargo build --release
 }
 
+# GNU/Linux Script with Bash
 build:lignux {
     #!/bin/bash
     echo "Building project on GNU/Linux"
     cargo build --release
 }
 
+# macOS Script with zsh
 build:macos {
     #!/bin/zsh
     echo "Building project on macOS"
     cargo build --release
 }
 
+# Unix/BSD Script with sh
 build:unix {
     #!/bin/sh
     echo "Hello from Unix!"
