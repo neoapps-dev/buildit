@@ -11,7 +11,7 @@ usePowershellOnWindows: true
 usePowershell7: true
 }
 
-# NOT IN USE, BECAUSE IT DOESN'T WORK (it just partially works)
+# IN USE, BUT IT DOESN'T WORK PROPERLY (it just partially works)
 build:windows {
 Write-Output "[BuildIt Builder] You have reached this compiler!"
 Write-Output "[BuildIt Builder] Building BuildIt..."
@@ -20,6 +20,7 @@ Copy-Item -Path "target\release\buildit.exe" -Destination "buildit.exe"
 Write-Output "[Buildit Builder] Done, try ``.\buildit.exe``"
 }
 
+# disabled for now
 build:windows-bat {
 @echo off
 echo [DEBUG] Arguments: %*
