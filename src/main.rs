@@ -27,17 +27,12 @@ fn get_os_type() -> &'static str {
     }
 }
 
-fn execute_command(command: &str, platform: &str, use_powershell: bool) {
+
+fn execute_command(command: &str, platform: &str) {
     let args: Vec<String> = env::args().collect();
     println!("[BuildIt] [INFO] Executing {}:{}", platform, &args[1]);
 
-    let output = if platform == "windows" && use_powershell {
-        Command::new("powershell")
-            .arg("-Command")
-            .arg(command)
-            .output()
-            .expect("[BuildIt] [ERROR] Error executing command on Windows with PowerShell")
-    } else if platform == "windows" {
+    let output = if platform == "windows" {
         Command::new("cmd")
             .arg("/c")
             .arg(command)
@@ -83,37 +78,17 @@ fn execute_command(command: &str, platform: &str, use_powershell: bool) {
     }
 }
 
-fn parse_build_file(filename: &str) -> (HashMap<String, HashMap<String, String>>, bool) {
+fn parse_build_file(filename: &str) -> HashMap<String, HashMap<String, String>> {
     let mut functions: HashMap<String, HashMap<String, String>> = HashMap::new();
     let file = File::open(filename).expect("[BuildIt] [ERROR] Could not open BuildFile");
     let mut multiline_command = String::new();
     let mut current_function = String::new();
     let mut current_platform = String::new();
-    let mut use_powershell_on_windows = false;
 
     for line in io::BufReader::new(file).lines() {
         let line = line.expect("[BuildIt] [ERROR] Error reading line from BuildFile").trim().to_string();
 
         if line.is_empty() || line.starts_with('#') || line.starts_with(':') {
-            continue;
-        }
-
-        if line.starts_with("config:buildit {") {
-            while let Some(config_line) = io::BufReader::new(file).lines().next() {
-                let config_line = config_line.expect("[BuildIt] [ERROR] Error reading line from BuildFile").trim().to_string();
-                if config_line.is_empty() || config_line.starts_with('#') {
-                    continue;
-                }
-                if config_line == "}" {
-                    break;
-                }
-                if config_line == "usePowershellOnWindows: true" {
-                    use_powershell_on_windows = true;
-                }
-                if config_line == "usePowershellOnWindows: false" {
-                    use_powershell_on_windows = false;
-                }
-            }
             continue;
         }
 
@@ -145,10 +120,10 @@ fn parse_build_file(filename: &str) -> (HashMap<String, HashMap<String, String>>
         multiline_command.push_str(&line);
         multiline_command.push_str("\n");
     }
-    (functions, use_powershell_on_windows)
+    functions
 }
 
-fn execute_platform_function(function_name: &str, platform: &str, functions: &HashMap<String, HashMap<String, String>>, use_powershell: bool) {
+fn execute_platform_function(function_name: &str, platform: &str, functions: &HashMap<String, HashMap<String, String>>) {
     if let Some(platform_map) = functions.get(function_name) {
         if let Some(command) = platform_map.get(platform) {
             let filename = if platform == "windows" {
@@ -168,9 +143,9 @@ fn execute_platform_function(function_name: &str, platform: &str, functions: &Ha
                 .expect("[BuildIt] [ERROR] Error writing to temporary script file");
 
             if platform == "windows" {
-                execute_command(&format!("cmd /c {}", filename), platform, use_powershell);
+                execute_command(&format!("cmd /c {}", filename), platform);
             } else {
-                execute_command(&format!("sh {}", filename), platform, use_powershell);
+                execute_command(&format!("sh {}", filename), platform);
             }
         } else {
             println!("{:#?}", platform_map);
@@ -196,6 +171,6 @@ fn main() {
     let current_os = get_os_type();
     let build_file = "BuildFile";
 
-    let (functions, use_powershell_on_windows) = parse_build_file(build_file);
-    execute_platform_function(function_name, current_os, &functions, use_powershell_on_windows);
+    let functions = parse_build_file(build_file);
+    execute_platform_function(function_name, current_os, &functions);
 }
