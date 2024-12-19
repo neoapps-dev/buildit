@@ -28,23 +28,18 @@ fn get_os_type() -> &'static str {
 }
 
 
-fn execute_command(command: &str, platform: &str) {
+fn execute_command(command: &str, platform: &str, use_powershell: bool) {
     let args: Vec<String> = env::args().collect();
     println!("[BuildIt] [INFO] Executing {}:{}", platform, &args[1]);
+    let full_command = format!("{} {}", command, args.iter().skip(2).map(|s| s.as_str()).collect::<Vec<&str>>().join(" "));
+    let executable = full_command.split(" ").nth(0).unwrap();
+    let arg1 = if executable == "cmd" {"/c"} else if executable == "powershell" || executable == "pwsh" {"-Command"} else {"-c"};
 
-    let output = if platform == "windows" {
-        Command::new("cmd")
-            .arg("/c")
-            .arg(command)
-            .output()
-            .expect("[BuildIt] [ERROR] Error executing command on Windows")
-    } else {
-        Command::new("sh")
-            .arg("-c")
-            .arg(command)
-            .output()
-            .expect("[BuildIt] [ERROR] Error executing command on Unix-like platform")
-    };
+    let output =  Command::new(executable)
+                            .arg(arg1)
+                            .arg(&full_command)
+                            .output()
+                            .expect("[BuildIt] [ERROR] Error executing on Windows");
 
     if !output.stdout.is_empty() {
         let stdout = String::from_utf8_lossy(&output.stdout);
@@ -57,13 +52,19 @@ fn execute_command(command: &str, platform: &str) {
     }
 
     if !output.status.success() {
-        eprintln!("[BuildIt] [ERROR] Command failed with status: {}", output.status);
+        eprintln!("[BuildIt] [ERROR] Failed with status: {}", output.status);
         exit(1);
     }
 
     if output.status.success() {
-        if platform == "windows" {
-            Command::new("cmd")
+        if platform == "windows" && !use_powershell {
+            Command::new("powershell")
+                .arg("-Command")
+                .arg("Remove-Item -Path .\\temp-pwsh.ps1")
+                .output()
+                .expect("[BuildIt] [ERROR] Error deleting temp file on Windows with Powershell");
+        } else if platform == "windows" && use_powershell {
+            Command::new("cmd") 
                 .arg("/c")
                 .arg("del temp.bat")
                 .output()
@@ -78,17 +79,52 @@ fn execute_command(command: &str, platform: &str) {
     }
 }
 
-fn parse_build_file(filename: &str) -> HashMap<String, HashMap<String, String>> {
+fn parse_build_file(filename: &str) -> (HashMap<String, HashMap<String, String>>, bool, bool) {
     let mut functions: HashMap<String, HashMap<String, String>> = HashMap::new();
     let file = File::open(filename).expect("[BuildIt] [ERROR] Could not open BuildFile");
+    let reader = io::BufReader::new(file);
+    let lines: Vec<String> = reader.lines().map(|line| line.expect("[BuildIt] [ERROR] Error reading line from BuildFile")).collect();
+
     let mut multiline_command = String::new();
     let mut current_function = String::new();
     let mut current_platform = String::new();
+    let mut use_powershell_on_windows = false;
+    let mut use_powershell7 = false;
 
-    for line in io::BufReader::new(file).lines() {
-        let line = line.expect("[BuildIt] [ERROR] Error reading line from BuildFile").trim().to_string();
+    let mut in_config_block = false;
+    for line in &lines {
+        let line = line.trim().to_string();
 
         if line.is_empty() || line.starts_with('#') || line.starts_with(':') {
+            continue;
+        }
+
+        if line.starts_with("config:buildit {") {
+            in_config_block = true;
+            continue;
+        }
+
+        if in_config_block {
+            let configline: &str = line.trim();
+            if configline.is_empty() || configline.starts_with('#') {
+                continue;
+            }
+            if configline == "}" {
+                in_config_block = false;
+                continue;
+            }
+            if configline == "usePowershellOnWindows: true" {
+                use_powershell_on_windows = true;
+            }
+            if configline == "usePowershellOnWindows: false" {
+                use_powershell_on_windows = false;
+            }
+            if configline == "usePowershell7: true" {
+                use_powershell7 = true;
+            }
+            if configline == "usePowershell7: false" {
+                use_powershell7 = false;
+            }
             continue;
         }
 
@@ -120,13 +156,16 @@ fn parse_build_file(filename: &str) -> HashMap<String, HashMap<String, String>> 
         multiline_command.push_str(&line);
         multiline_command.push_str("\n");
     }
-    functions
+    (functions, use_powershell_on_windows, use_powershell7)
 }
 
-fn execute_platform_function(function_name: &str, platform: &str, functions: &HashMap<String, HashMap<String, String>>) {
+
+fn execute_platform_function(function_name: &str, platform: &str, functions: &HashMap<String, HashMap<String, String>>, use_powershell: bool, use_powershell7: bool) {
     if let Some(platform_map) = functions.get(function_name) {
         if let Some(command) = platform_map.get(platform) {
-            let filename = if platform == "windows" {
+            let filename = if platform == "windows" && use_powershell {
+                "temp-pwsh.ps1"
+            } else if platform == "windows" {
                 "temp.bat"
             } else {
                 "temp.sh"
@@ -142,10 +181,14 @@ fn execute_platform_function(function_name: &str, platform: &str, functions: &Ha
             file.write_all(command.as_bytes())
                 .expect("[BuildIt] [ERROR] Error writing to temporary script file");
 
-            if platform == "windows" {
-                execute_command(&format!("cmd /c {}", filename), platform);
+            if platform == "windows" && !use_powershell {
+                execute_command(&format!("cmd /c {}", filename), platform, use_powershell);
+            } else if platform == "windows" && use_powershell && !use_powershell7 {
+                execute_command(&format!("powershell -File {}", filename), platform, use_powershell);
+            } else if platform == "windows" && use_powershell && use_powershell7 {
+                execute_command(&format!("pwsh -File {}", filename), platform, use_powershell);
             } else {
-                execute_command(&format!("sh {}", filename), platform);
+                execute_command(&format!("sh {}", filename), platform, use_powershell);
             }
         } else {
             println!("{:#?}", platform_map);
@@ -161,9 +204,23 @@ fn execute_platform_function(function_name: &str, platform: &str, functions: &Ha
 fn main() {
     let args: Vec<String> = env::args().collect();
     if args.len() < 2 {
+        println!("
+██████╗ ██╗   ██╗██╗██╗     ██████╗ ██╗████████╗
+██╔══██╗██║   ██║██║██║     ██╔══██╗██║╚══██╔══╝
+██████╔╝██║   ██║██║██║     ██║  ██║██║   ██║   
+██╔══██╗██║   ██║██║██║     ██║  ██║██║   ██║   
+██████╔╝╚██████╔╝██║███████╗██████╔╝██║   ██║   
+╚═════╝  ╚═════╝ ╚═╝╚══════╝╚═════╝ ╚═╝   ╚═╝    CLI
+                                                
+        ");
         println!("Welcome to BuildIt!");
         println!("The Universal Solution for Cross-Platform Build Automation.");
-        println!("Usage: buildit <FunctionName> (e.g. build, run, etc..)");
+        println!("
+        Usage: 
+        {} <FunctionName>
+
+        Arguments:
+        <FunctionName> ==> The name of the function to execute from the BuildFile.",args[0].replace("\\", "/").replace(".exe", "").split("/").last().unwrap());
         exit(0);
     }
 
@@ -171,6 +228,6 @@ fn main() {
     let current_os = get_os_type();
     let build_file = "BuildFile";
 
-    let functions = parse_build_file(build_file);
-    execute_platform_function(function_name, current_os, &functions);
+    let (functions, use_powershell_on_windows, use_powershell7) = parse_build_file(build_file);
+    execute_platform_function(function_name, current_os, &functions, use_powershell_on_windows, use_powershell7);
 }
