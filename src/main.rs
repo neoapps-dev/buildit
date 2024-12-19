@@ -28,10 +28,10 @@ fn get_os_type() -> &'static str {
 }
 
 
-fn execute_command(command: &str, platform: &str, use_powershell: bool) {
+fn execute_command(command: &str, platform: &str, use_powershell: bool, pass_args: bool) {
     let args: Vec<String> = env::args().collect();
-    println!("[BuildIt] [INFO] Executing {}:{}", platform, &args[1]);
-    let full_command = format!("{} {}", command, args.iter().skip(2).map(|s| s.as_str()).collect::<Vec<&str>>().join(" "));
+    println!("[BuildIt] [INFO] Executing {}:{}", &args[1], platform);
+    let full_command: &str =if pass_args {&format!("{} {}", command, args.iter().skip(2).map(|s| s.as_str()).collect::<Vec<&str>>().join(" "))} else {command};
     let executable = full_command.split(" ").nth(0).unwrap();
     let arg1 = if executable == "cmd" {"/c"} else if executable == "powershell" || executable == "pwsh" {"-Command"} else {"-c"};
 
@@ -79,7 +79,7 @@ fn execute_command(command: &str, platform: &str, use_powershell: bool) {
     }
 }
 
-fn parse_build_file(filename: &str) -> (HashMap<String, HashMap<String, String>>, bool, bool) {
+fn parse_build_file(filename: &str) -> (HashMap<String, HashMap<String, String>>, bool, bool, bool) {
     let mut functions: HashMap<String, HashMap<String, String>> = HashMap::new();
     let file = File::open(filename).expect("[BuildIt] [ERROR] Could not open BuildFile");
     let reader = io::BufReader::new(file);
@@ -90,6 +90,7 @@ fn parse_build_file(filename: &str) -> (HashMap<String, HashMap<String, String>>
     let mut current_platform = String::new();
     let mut use_powershell_on_windows = false;
     let mut use_powershell7 = false;
+    let mut pass_args = true;
 
     let mut in_config_block = false;
     for line in &lines {
@@ -125,6 +126,12 @@ fn parse_build_file(filename: &str) -> (HashMap<String, HashMap<String, String>>
             if configline == "usePowershell7: false" {
                 use_powershell7 = false;
             }
+            if configline == "passArgs: true" {
+                pass_args = true;
+            }
+            if configline == "passArgs: false" {
+                pass_args = false;
+            }
             continue;
         }
 
@@ -156,11 +163,11 @@ fn parse_build_file(filename: &str) -> (HashMap<String, HashMap<String, String>>
         multiline_command.push_str(&line);
         multiline_command.push_str("\n");
     }
-    (functions, use_powershell_on_windows, use_powershell7)
+    (functions, use_powershell_on_windows, use_powershell7, pass_args)
 }
 
 
-fn execute_platform_function(function_name: &str, platform: &str, functions: &HashMap<String, HashMap<String, String>>, use_powershell: bool, use_powershell7: bool) {
+fn execute_platform_function(function_name: &str, platform: &str, functions: &HashMap<String, HashMap<String, String>>, use_powershell: bool, use_powershell7: bool, pass_args: bool) {
     if let Some(platform_map) = functions.get(function_name) {
         if let Some(command) = platform_map.get(platform) {
             let filename = if platform == "windows" && use_powershell {
@@ -182,13 +189,13 @@ fn execute_platform_function(function_name: &str, platform: &str, functions: &Ha
                 .expect("[BuildIt] [ERROR] Error writing to temporary script file");
 
             if platform == "windows" && !use_powershell {
-                execute_command(&format!("cmd /c {}", filename), platform, use_powershell);
+                execute_command(&format!("cmd /c {}", filename), platform, use_powershell, pass_args);
             } else if platform == "windows" && use_powershell && !use_powershell7 {
-                execute_command(&format!("powershell -File {}", filename), platform, use_powershell);
+                execute_command(&format!("powershell -File {}", filename), platform, use_powershell, pass_args);
             } else if platform == "windows" && use_powershell && use_powershell7 {
-                execute_command(&format!("pwsh -File {}", filename), platform, use_powershell);
+                execute_command(&format!("pwsh -File {}", filename), platform, use_powershell, pass_args);
             } else {
-                execute_command(&format!("sh {}", filename), platform, use_powershell);
+                execute_command(&format!("sh {}", filename), platform, use_powershell, pass_args);
             }
         } else {
             println!("{:#?}", platform_map);
@@ -228,6 +235,6 @@ fn main() {
     let current_os = get_os_type();
     let build_file = "BuildFile";
 
-    let (functions, use_powershell_on_windows, use_powershell7) = parse_build_file(build_file);
-    execute_platform_function(function_name, current_os, &functions, use_powershell_on_windows, use_powershell7);
+    let (functions, use_powershell_on_windows, use_powershell7, pass_args) = parse_build_file(build_file);
+    execute_platform_function(function_name, current_os, &functions, use_powershell_on_windows, use_powershell7, pass_args);
 }

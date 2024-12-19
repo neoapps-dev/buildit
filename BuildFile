@@ -3,12 +3,14 @@
 
 # Configurations
 # ==============
-# Line 1: Makes sure that BuildIt use Powershell on Windows instead of CMD.EXE                                            ====> Applies on ALL `windows` functions.
-# Line 2: Makes sure that BuildIt use Powershell 7 instead of the default Powershell (requires `pwsh` to be installed)    ====> Applies on ALL `windows` functions.
+# Line 1: Makes sure that BuildIt use Powershell on Windows instead of CMD.EXE                                            ====> Applies on ALL `windows` functions.     default ====> false
+# Line 2: Makes sure that BuildIt use Powershell 7 instead of the default Powershell (requires `pwsh` to be installed)    ====> Applies on ALL `windows` functions.     default ====> false
+# Line 3: Enables passing arguments to the script.                                                                        ====> Applies on ALL functions.               default ====> true
 # ==============
 config:buildit {
 usePowershellOnWindows: true
 usePowershell7: true
+passArgs: true
 }
 
 # IN USE, BUT IT DOESN'T WORK PROPERLY (it just partially works)
