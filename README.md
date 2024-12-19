@@ -7,9 +7,9 @@ BuildIt is a simple and universal solution for automating build processes across
 
 ## Features
 
-- **Cross-Platform Support**: Supports Windows, GNU/Linux, macOS and any Unix-like/based OS.
+- **Cross-Platform Support**: Supports Windows, GNU/Linux, macOS and any Unix-like/based OS that Rust supports.
 - **Customizable Build Functions**: Allows users to define platform-specific commands in a `BuildFile`.
-- **Temporary Script Execution**: Creates temporary batch or shell scripts based on the platform to execute commands.
+- **Configurations**: Uses a simple format to change specific things in the building process.
 
 ## Prerequisites
 
