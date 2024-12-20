@@ -1,6 +1,9 @@
 <div align="center">
   <h1>BuildIt</h1>
   <p><em>Cross-Platform Build Automation</em></p>
+  
+  [![Codeac](https://static.codeac.io/badges/2-903404923.svg "Codeac")](https://app.codeac.io/github/neoapps-dev/buildit)
+
 </div>
 
 BuildIt is a simple and universal solution for automating build processes across multiple platforms, including Windows, GNU/Linux, Unix, and macOS. It reads a `BuildFile` that defines functions for each platform, and then executes the corresponding commands in a platform-specific manner.
