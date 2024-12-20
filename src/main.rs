@@ -218,11 +218,9 @@ fn main() {
 ██╔══██╗██║   ██║██║██║     ██║  ██║██║   ██║   
 ██████╔╝╚██████╔╝██║███████╗██████╔╝██║   ██║   
 ╚═════╝  ╚═════╝ ╚═╝╚══════╝╚═════╝ ╚═╝   ╚═╝    CLI
-                                                
-        ");
-        println!("Welcome to BuildIt!");
-        println!("The Universal Solution for Cross-Platform Build Automation.");
-        println!("
+                                        
+        Welcome to BuildIt!
+        The Universal Solution for Cross-Platform Build Automation.
         Usage: 
         {} <FunctionName>
 
