@@ -2,8 +2,8 @@
   <h1>BuildIt</h1>
   <p><em>Cross-Platform Build Automation</em></p>
   
-  [![Codeac](https://static.codeac.io/badges/2-903404923.svg "Codeac")](https://app.codeac.io/github/neoapps-dev/buildit)
-
+  [![Codeac](https://static.codeac.io/badges/2-903404923.svg "Codeac")](https://app.codeac.io/github/neoapps-dev/buildit) [![License](https://img.shields.io/github/license/neoapps-dev/buildit.svg?style=flat-square)](https://github.com/neoapps-dev/buildit/blob/master/LICENSE) ![Rust](https://img.shields.io/badge/Rust-000000?logo=Rust&logoColor=white) [![Linux](https://img.shields.io/badge/GNU/Linux-FCC624?logo=linux&logoColor=black)](#) [![Windows](https://custom-icon-badges.demolab.com/badge/Windows-0078D6?logo=windows11&logoColor=white)](#) [![macOS](https://img.shields.io/badge/macOS-000000?logo=apple&logoColor=F0F0F0)](#)
+  [![BSD](https://img.shields.io/badge/BSD-000000?logo=freebsd&logoColor=F0F0F0)](#)
 </div>
 
 BuildIt is a simple and universal solution for automating build processes across multiple platforms, including Windows, GNU/Linux, Unix, and macOS. It reads a `BuildFile` that defines functions for each platform, and then executes the corresponding commands in a platform-specific manner.
