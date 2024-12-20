@@ -9,19 +9,19 @@ fn get_os_type() -> &'static str {
     {
         "windows"
     }
-    #[cfg(target_os = "linux")]
+    #[cfg(any(target_os = "linux", target_os = "android"))]
     {
-        "linux"
+        "lignux"
     }
     #[cfg(target_os = "macos")]
     {
         "macos"
     }
-    #[cfg(target_os = "unix")]
+    #[cfg(any(target_os = "freebsd", target_os="openbsd", target_os="netbsd"))]
     {
         "unix"
     }
-    #[cfg(not(any(windows, target_os = "linux", target_os = "macos", target_os = "unix")))]
+    #[cfg(not(any(windows, target_os = "linux", target_os = "macos", target_os = "freebsd", target_os = "netbsd", target_os = "openbsd")))]
     {
         "unknown"
     }
