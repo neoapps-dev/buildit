@@ -1,4 +1,5 @@
 <div align="center">
+  <img width="150" height="150" src="github_assets/logo.png">
   <h1>BuildIt</h1>
   <p><em>Cross-Platform Build Automation</em></p>
   
