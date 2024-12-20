@@ -21,7 +21,7 @@ fn get_os_type() -> &'static str {
     {
         "unix"
     }
-    #[cfg(not(any(windows, target_os = "linux", target_os = "macos", target_os = "freebsd", target_os = "netbsd", target_os = "openbsd")))]
+    #[cfg(not(any(windows, target_os = "linux", target_os = "android" ,target_os = "macos", target_os = "freebsd", target_os = "netbsd", target_os = "openbsd")))]
     {
         "unknown"
     }
