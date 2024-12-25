@@ -128,6 +128,10 @@ If there are errors during command execution, BuildIt will display:
 - An error message with the failed command.
 - The specific error status for the command execution.
 
+## Known Issues
+
+- PowerShell 5 and 7 throws a permission error on PowerShell scripts. #1
+
 ## License
 
 This project is licensed under the [GNU General Public License v3.0](LICENSE) License.
