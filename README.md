@@ -130,7 +130,7 @@ If there are errors during command execution, BuildIt will display:
 
 ## Known Issues
 
-- [ ] #1  ==>  PowerShell 5 and 7 throws a permission error on PowerShell scripts.
+- [ ] #1
 
 ## License
 
