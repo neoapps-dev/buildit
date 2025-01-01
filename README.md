@@ -22,6 +22,15 @@ BuildIt is a simple and universal solution for automating build processes across
 
 ## Installation
 
+To install BuildIt on your system:
+
+- AUR (for Arch GNU/Linux):
+    ```bash
+    yay -S buildit-git
+    ```
+
+## Manual Installation
+
 Follow these steps to get BuildIt up and running on your system:
 
 1. **Clone the repository**:
