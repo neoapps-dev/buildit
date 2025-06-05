@@ -33,7 +33,7 @@ fn execute_command(command: &str, platform: &str, use_powershell: bool, pass_arg
     println!("[BuildIt] [INFO] Executing {}:{}", &args[1], platform);
     let full_command: &str =if pass_args {&format!("{} {}", command, args.iter().skip(2).map(|s| s.as_str()).collect::<Vec<&str>>().join(" "))} else {command};
     let executable = full_command.split(" ").nth(0).unwrap();
-    let arg1 = if executable == "cmd" {"/c"} else if executable == "powershell" || executable == "pwsh" {"-Command"} else {"-c"};
+    let arg1 = if executable == "cmd" {"/c"} else if executable == "powershell" || executable == "pwsh" {"-ExecutionPolicy Bypass -Command"} else {"-c"};
 
     let output =  Command::new(executable)
                             .arg(arg1)
