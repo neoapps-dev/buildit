@@ -139,7 +139,7 @@ If there are errors during command execution, BuildIt will display:
 
 ## Known Issues
 
-- [ ] [#1](https://github.com/neoapps-dev/buildit/issues/1)
+- [ ] [#1](https://github.com/neoapps-dev/buildit/issues/1) (FIXED)
 
 ## License
 
